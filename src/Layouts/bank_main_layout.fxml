@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="830.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Layouts.MainViewController">
+   <children>
+      <MenuBar layoutX="-6.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="845.0" snapToPixel="false">
+        <menus>
+          <Menu fx:id="overView" mnemonicParsing="false" text="Overzicht">
+               <items>
+                  <MenuItem fx:id="Accounts" mnemonicParsing="false" text="Rekeningen" />
+                  <MenuItem fx:id="Transactions" mnemonicParsing="false" text="Transacties" />
+               </items></Menu>
+          <Menu mnemonicParsing="false" text="Klant">
+            <items>
+              <MenuItem fx:id="NewCustomer" mnemonicParsing="false" text="Nieuwe klant" />
+                  <MenuItem fx:id="EditCustomer" mnemonicParsing="false" text="Klantgegevens wijzigen" />
+                  <MenuItem fx:id="DeleteCustomer" mnemonicParsing="false" text="Klant verwijderen" />
+            </items>
+          </Menu>
+            <Menu mnemonicParsing="false" text="Database">
+              <items>
+                <MenuItem fx:id="LocalDatabase" mnemonicParsing="false" text="Local" />
+                  <MenuItem fx:id="LiveDatabase" mnemonicParsing="false" text="Live" />
+              </items>
+            </Menu>
+        </menus>
+      </MenuBar>
+      <TableView fx:id="ViewTable" layoutX="21.0" layoutY="78.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="411.0" prefWidth="799.0" />
+      <Label fx:id="ViewTitle" alignment="CENTER" layoutX="-1.0" layoutY="29.0" prefHeight="46.0" prefWidth="822.0" textAlignment="JUSTIFY">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+   </children>
+</Pane>
