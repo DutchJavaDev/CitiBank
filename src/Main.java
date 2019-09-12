@@ -3,7 +3,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import views.controllers.App;
+import Layouts.App;
 
 import java.sql.*;
 
@@ -11,16 +11,17 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("views/controllers/bank_main_layout.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Layouts/bank_main_layout.fxml"));
         Parent root = loader.load();
-
-        test();
 
         primaryStage.setResizable(false);
         primaryStage.setTitle(App.AppName);
         primaryStage.setScene(new Scene(root));
+
+        App.PrimaryStage = primaryStage;
+
         primaryStage.show();
-    }
+}
 
 
     public void test()
