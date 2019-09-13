@@ -1,9 +1,8 @@
 package Db;
 
 import Layouts.App;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
+
+import java.sql.*;
 
 import static Layouts.App.AppException;
 import static Layouts.App.Info;
@@ -16,9 +15,14 @@ import static Utils.Enums.DbVersions;
 public class Database {
 
     private static final String JDBCDriver = "com.mysql.cj.jdbc.Driver";
-    private static final String LocalDbConnection = "jdbc:mysql://localhost/citibankDB?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC\"";
+    private static final String LocalDbConnection = "jdbc:mysql://localhost/citibankDB?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
     private static final String LiveDbConnection = "";
     private static final StringBuilder QueryBuilder = new StringBuilder();
+
+    private static final  String USER_TABLE = "citibank_user_accounts";
+    private static final String[] USER_TABLE_PARAMS = {
+            "userName","surName","userdBirth","userPhone","userEmail","userregisterDate","userBankAccountId"
+    };
 
     private static String ConnectionString;
 
@@ -26,23 +30,16 @@ public class Database {
     private static String Password = "";
 
 
-    public static void CreateUserAccount(String[] values)
+    public static boolean CreateUserAccount(Object[] values)
     {
-        // TODO
-        if (InsertQuery("",new String[]{""},values))
-        {
-
-        }
-        else
-        {
-
-        }
+        return InsertQuery(USER_TABLE,USER_TABLE_PARAMS,values);
     }
 
     public static void CreateUserBankAccount(String[] values)
     {
+
         // TODO
-        if (InsertQuery("",new String[]{""},values))
+        if (InsertQuery("",new String[]{"userName",""},values))
         {
 
         }
@@ -53,7 +50,7 @@ public class Database {
     }
 
 
-    private static boolean InsertQuery(String table, String[] params, String[] values)
+    private static boolean InsertQuery(String table, String[] params, Object[] values)
     {
         try {
             QueryBuilder.delete(0,QueryBuilder.length());
@@ -62,13 +59,55 @@ public class Database {
 
             Connection connection = DriverManager.getConnection(ConnectionString,UserName,Password);
 
-            Statement stmt = connection.prepareStatement("");
+            StringBuilder queryBuilder = new StringBuilder();
 
+            queryBuilder.append(String.format("INSERT INTO %s (",table));
+
+            for(int index = 0; index < params.length; index++)
+            {
+                if(index == params.length-1)
+                {
+                    queryBuilder.append(String.format("%s)",params[index]));
+                }
+                else
+                    queryBuilder.append(String.format("%s,",params[index]));
+            }
+
+            queryBuilder.append(" VALUES (");
+
+            for(int index = 0; index < params.length; index++)
+            {
+                System.out.println("V:"+index);
+                if(index == params.length-1)
+                {
+                    queryBuilder.append("?);");
+                }
+                else
+                    queryBuilder.append("?,");
+            }
+
+            PreparedStatement stmt = connection.prepareStatement(queryBuilder.toString());
+
+            for(int index = 0; index < values.length; index++)
+            {
+                System.out.println("P:"+index);
+                if(values[index] instanceof Integer)
+                {
+                    stmt.setInt(index+1,(int)values[index]);
+                }
+
+                if(values[index] instanceof String)
+                {
+                    stmt.setString(index+1,(String)values[index]);
+                }
+            }
+
+            stmt.executeUpdate();
             return true;
         }
         catch (Exception e)
         {
-            AppException(e.toString());
+            e.printStackTrace();
             return false;
         }
     }
