@@ -3,6 +3,12 @@ import Db.Database;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Stage;
+import javafx.util.StringConverter;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 /**
  * Created by boris on 10-9-2019.
@@ -14,7 +20,7 @@ public class MakeAccountController {
     private TextField UserName;
 
     @FXML
-    private TextField UserSurename;
+    private TextField UserSurname;
 
     @FXML
     private DatePicker UserBirth;
@@ -41,9 +47,32 @@ public class MakeAccountController {
     private void initialize()
     {
         UserName.setText("");
-        UserSurename.setText("");
+        UserSurname.setText("");
         UserEmail.setText("");
         UserPhone.setText("");
+
+        UserBirth.setConverter(new StringConverter<LocalDate>()
+    {
+        private DateTimeFormatter dateTimeFormatter=DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+        @Override
+        public String toString(LocalDate localDate)
+        {
+            if(localDate==null)
+                return "";
+            return dateTimeFormatter.format(localDate);
+        }
+
+        @Override
+        public LocalDate fromString(String dateString)
+        {
+            if(dateString==null || dateString.trim().isEmpty())
+            {
+                return null;
+            }
+            return LocalDate.parse(dateString,dateTimeFormatter);
+        }
+    });
 
         UserHasBalance.setOnAction(i -> UserBalance.setDisable(!UserHasBalance.isSelected()));
 
@@ -106,7 +135,7 @@ public class MakeAccountController {
                 return;
             }
 
-            if(UserSurename.getText().isEmpty())
+            if(UserSurname.getText().isEmpty())
             {
                 ErrorReport.setText("AchterNaam mag niet leeg zijn!");
                 return;
@@ -139,9 +168,21 @@ public class MakeAccountController {
                 }
             }
 
-            Database.CreateUserAccount(new String[]{
-                    // TODO
+            boolean created = Database.CreateUserAccount(new Object[]{
+                    UserName.getText(),
+                    UserSurname.getText(),
+                    UserBirth.getEditor().getText(),
+                    Integer.parseInt(UserPhone.getText()),
+                    UserEmail.getText(),
+                    java.time.LocalDate.now().toString(),
+                    0
             });
+
+            if(created)
+            {
+                App.Info("Gelukt!, gebruiker is toegevoegd");
+                ((Stage)MakeAccount.getScene().getWindow()).close();
+            }
 
         });
     }
