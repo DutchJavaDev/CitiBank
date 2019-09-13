@@ -52,7 +52,7 @@ public class App {
 
     public static void Info(Object message)
     {
-        OpenAlert(message,AlertType.INFORMATION);
+        OpenAlert(message.toString(),AlertType.INFORMATION);
     }
 
     public static boolean IsNumeric(char c)
