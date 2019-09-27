@@ -74,9 +74,7 @@ public class MainViewController {
 
         Transactions.setOnAction(i -> ShowTransactions());
 
-        NewCustomer.setOnAction(i -> {
-            App.OpenUI("bank_add_user","Add User",false);
-        });
+        NewCustomer.setOnAction(i -> App.OpenUI("bank_add_user","Add User",false,true));
     }
 
     private void ShowUserAccounts()
