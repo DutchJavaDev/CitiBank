@@ -60,7 +60,7 @@ public class App {
         return Arrays.stream(ValidNumericInputs).anyMatch(i -> i == c);
     }
 
-    public static void OpenUI(String ui,String title,boolean resize)
+    public static void OpenUI(String ui,String title,boolean resize,boolean blockMain)
     {
          try {
              FXMLLoader loader = new FXMLLoader(App.class.getClassLoader().getResource(String.format("Layouts/%s.fxml",ui)));
@@ -71,7 +71,7 @@ public class App {
              tempUI.setTitle(title);
              tempUI.setScene(new Scene(root));
              tempUI.initOwner(PrimaryStage);
-             tempUI.initModality(Modality.WINDOW_MODAL);
+             tempUI.initModality(blockMain ? Modality.WINDOW_MODAL : Modality.APPLICATION_MODAL);
              tempUI.showAndWait();
          }
          catch (Exception e)
