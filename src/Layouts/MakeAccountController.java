@@ -8,7 +8,7 @@ import javafx.util.StringConverter;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+
 
 /**
  * Created by boris on 10-9-2019.
@@ -50,6 +50,7 @@ public class MakeAccountController {
         UserSurname.setText("");
         UserEmail.setText("");
         UserPhone.setText("");
+        UserBalance.setText("0.00");
 
         UserBirth.setConverter(new StringConverter<LocalDate>()
     {
@@ -80,7 +81,7 @@ public class MakeAccountController {
             char c = event.getCharacter().charAt(0);
 
             // Only allow number characters
-            if(!App.IsNumeric(c))
+            if(!App.IsNumeric(c) || UserPhone.getText().length() == 9)
                 event.consume();
         });
 
@@ -175,8 +176,8 @@ public class MakeAccountController {
                     Integer.parseInt(UserPhone.getText()),
                     UserEmail.getText(),
                     java.time.LocalDate.now().toString(),
-                    0
-            });
+                    0,
+            }, Double.parseDouble(UserBalance.getText()));
 
             if(created)
             {
