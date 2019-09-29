@@ -1,7 +1,14 @@
 package Db;
 
 import Layouts.App;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static Layouts.App.AppException;
 import static Layouts.App.Info;
@@ -31,7 +38,7 @@ public class Database {
     private static String Password = "";
 
 
-    public static boolean CreateUserAccount(Object[] values,double balance)
+    public static boolean CreateUserAccount(Object[] values, double balance)
     {
         DatabaseResult userAccount = InsertQuery(USER_TABLE,USER_TABLE_PARAMS,values);
 
@@ -47,11 +54,63 @@ public class Database {
         return false;
     }
 
-    private static DatabaseResult CreateUserBankAccount(int accountId,double balance)
+    private static DatabaseResult CreateUserBankAccount(int accountId, double balance)
     {
         return InsertQuery(BANK_ACCOUNTS_TABLE,new String[]{"balance","accountId"},new Object[]{balance,accountId});
     }
 
+    public static ObservableList<Account> GetAllAccounts()
+    {
+        List<Object[]> db = QueryAll(USER_TABLE,9);
+        List<Account> accounts = new ArrayList<>();
+
+        if(db == null)
+            return FXCollections.observableList(accounts);
+
+        int AccountId;
+        String AccountName;
+        String AccountSurname;
+        String UserBirth;
+        String AccountPhoneNumber;
+        String AccountEmail;
+        String AccountRegisterDate;
+        int BankAccountId;
+
+        for(Object[] dbresult : db)
+        {
+            AccountId = (int) dbresult[0];
+            AccountName = (String) dbresult[1];
+            AccountSurname = (String) dbresult[2];
+            UserBirth = dbresult[3].toString();
+            AccountPhoneNumber = dbresult[4].toString();
+            AccountEmail = (String) dbresult[5];
+            AccountRegisterDate = dbresult[7].toString();
+            BankAccountId = (int) dbresult[8];
+
+            BankAccount account;
+
+            List<Object[]> accs = QueryWhere(BANK_ACCOUNTS_TABLE,"bankId",BankAccountId,3);
+
+            if(accs == null || accs.isEmpty())
+            {
+                Info(String.format("No Bankaccount with id %s found",BankAccountId));
+                account = new BankAccount(-1,-0.0,-1);
+            }
+            else
+            {
+                Object[] acc = accs.get(0);
+                account = new BankAccount((int)acc[0],(double)acc[1],(int)acc[2]);
+            }
+
+
+            accounts.add(new Account(AccountId,AccountName,AccountSurname,UserBirth,AccountPhoneNumber,AccountEmail,AccountRegisterDate,account));
+        }
+
+        return FXCollections.observableList(accounts);
+    }
+
+
+    /**Query's**/
     private static DatabaseResult UpdateQuery(String table, String[] params, Object[] values, String condition, Object conditionValue)
     {
         try {
@@ -70,14 +129,17 @@ public class Database {
             FillQuery(values, stmt);
 
             int id = stmt.executeUpdate();
-            ResultSet set = stmt.getGeneratedKeys();
+            ResultSet rs = stmt.getGeneratedKeys();
 
-            if(set.next())
+            if(rs.next())
             {
-                return new DatabaseResult(set.getInt(1), true);
+                return new DatabaseResult(rs.getInt(1), true);
             }
 
             Warning("Failed to read generated keys, contact the developer!");
+            rs.close();
+            stmt.close();
+            connection.close();
             return new DatabaseResult(-1,true);
         }
         catch (Exception e)
@@ -130,6 +192,9 @@ public class Database {
             }
 
             Warning("Failed to read generated keys, contact the developer!");
+            rs.close();
+            stmt.close();
+            connection.close();
             return new DatabaseResult(-1,true);
         }
         catch (Exception e)
@@ -138,6 +203,82 @@ public class Database {
             return new DatabaseResult(-1,false);
         }
     }
+
+    private static List<Object[]> QueryAll(String table, int rowCount)
+    {
+        try {
+            Connection connection = GetConnection();
+
+            List<Object[]> result = new ArrayList<>();
+
+            QueryBuilder.append(String.format("SELECT * from %s;",table));
+
+            Statement stmt = connection.createStatement();
+
+            ResultSet rs = stmt.executeQuery(QueryBuilder.toString());
+
+            while(rs.next())
+            {
+                Object[] data = new Object[rowCount];
+
+                for(int i = 0; i < data.length; i++)
+                {
+                    data[i] = rs.getObject(i+1);
+                }
+                result.add(data);
+            }
+
+            connection.close();
+            stmt.close();
+            rs.close();
+            return  result;
+        }
+        catch (Exception e)
+        {
+            Error(e.getMessage());
+            return  null;
+        }
+    }
+
+    private static List<Object[]> QueryWhere(String table, String condition, Object conditionValue, int rowCount)
+    {
+        try {
+            Connection connection = GetConnection();
+
+            List<Object[]> result = new ArrayList<>();
+
+            QueryBuilder.append(String.format("SELECT * FROM %s WHERE %s = ?;",table,condition));
+
+            PreparedStatement stmt = connection.prepareStatement(QueryBuilder.toString());
+
+            FillQuery(new Object[]{conditionValue},stmt);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while(rs.next())
+            {
+                Object[] data = new Object[rowCount];
+
+                for(int i = 0; i < data.length; i++)
+                {
+                    data[i] = rs.getObject(i+1);
+                }
+                result.add(data);
+            }
+
+            connection.close();
+            stmt.close();
+            rs.close();
+            return result;
+        }
+        catch (Exception e)
+        {
+            Error(e.getMessage());
+            return  null;
+        }
+    }
+    /**End Query's**/
+
 
     public static void SetDbConnectionTo(DbVersions type)
     {
@@ -168,7 +309,7 @@ public class Database {
         return DriverManager.getConnection(ConnectionString,UserName,Password);
     }
 
-    private static void FillQuery(Object[] values,PreparedStatement stmt) throws Exception
+    private static void FillQuery(Object[] values, PreparedStatement stmt) throws Exception
     {
         for(int index = 0; index < values.length; index++)
         {
