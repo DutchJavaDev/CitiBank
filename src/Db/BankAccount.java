@@ -1,31 +1,36 @@
 package Db;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+
 /**
  * Created by boris on 10-9-2019.
  * Java WIZ XD
  */
 public class BankAccount {
 
-    private final int BankAccountId;
-    private final int BankAccountUserId;
-    private final double BankAccountBalance;
+    private final IntegerProperty BankAccountId;
+    private final IntegerProperty BankAccountUserId;
+    private final DoubleProperty BankAccountBalance;
 
-    public BankAccount(int id,int userId,double balance)
+    public BankAccount(int id,double balance,int userId)
     {
-        this.BankAccountId = id;
-        this.BankAccountUserId = userId;
-        this.BankAccountBalance = balance;
+        BankAccountId = new SimpleIntegerProperty(id);
+        BankAccountUserId = new SimpleIntegerProperty(userId);
+        BankAccountBalance = new SimpleDoubleProperty(balance);
     }
 
     public int getBankAccountId() {
-        return BankAccountId;
+        return BankAccountId.getValue();
     }
 
     public int getBankAccountUserId() {
-        return BankAccountUserId;
+        return BankAccountUserId.getValue();
     }
 
     public double getBankAccountBalance() {
-        return BankAccountBalance;
+        return BankAccountBalance.doubleValue();
     }
 }
