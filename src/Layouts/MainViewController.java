@@ -1,4 +1,5 @@
 package Layouts;
+import Db.Account;
 import Db.Database;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -8,6 +9,9 @@ import javafx.scene.control.MenuItem;
 import Utils.Enums;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+
+import java.util.ArrayList;
 
 
 /**
@@ -16,15 +20,7 @@ import javafx.scene.control.TableView;
  */
 public class MainViewController {
 
-    private final ObservableList<TableColumn> USERACOUNTSCOLUMS = FXCollections.observableArrayList(
-            new TableColumn("Naam"),
-            new TableColumn("Rekening"),
-            new TableColumn("Geb datum"),
-            new TableColumn("Saldo"),
-            new TableColumn("Email"),
-            new TableColumn("Telefoon"),
-            new TableColumn("Reg datum")
-    );
+    private ObservableList USERACOUNTSCOLUMS;
 
     private final ObservableList<TableColumn> TRANSACTIONSCOLUMNS = FXCollections.observableArrayList(
             new TableColumn("Zender"),
@@ -66,6 +62,7 @@ public class MainViewController {
     {
         // Default
         Database.SetDbConnectionTo(Enums.DbVersions.LOCAL);
+        SetUserTableColumns();
 
         // Default view
         ShowUserAccounts();
@@ -74,18 +71,47 @@ public class MainViewController {
 
         Transactions.setOnAction(i -> ShowTransactions());
 
-        NewCustomer.setOnAction(i -> App.OpenUI("bank_add_user","Add User",false,true));
+        NewCustomer.setOnAction(i -> {
+            App.OpenUI("bank_add_user","Add User",false,true);
+            ShowUserAccounts();
+        });
     }
 
     private void ShowUserAccounts()
     {
         ViewTable.getColumns().clear();
+        ViewTable.getItems().clear();
         ViewTable.getColumns().addAll(USERACOUNTSCOLUMS);
+        ViewTable.setItems(Database.GetAllAccounts());
     }
 
     private void ShowTransactions()
     {
         ViewTable.getColumns().clear();
+        ViewTable.getItems().clear();
         ViewTable.getColumns().addAll(TRANSACTIONSCOLUMNS);
+    }
+
+    private void SetUserTableColumns()
+    {
+        ArrayList<TableColumn> tableColumns = new ArrayList<>();
+        tableColumns.add(CreateTableColumn("#Id","AccountId"));
+        tableColumns.add(CreateTableColumn("Naam","AccountName"));
+        tableColumns.add(CreateTableColumn("AchterNaam","AccountSurname"));
+        tableColumns.add(CreateTableColumn("Geb datum","UserBirthday"));
+        tableColumns.add(CreateTableColumn("Telefoon","AccountPhoneNumber"));
+        tableColumns.add(CreateTableColumn("Email","AccountEmail"));
+        tableColumns.add(CreateTableColumn("Reg datum","AccountRegisterDate"));
+        tableColumns.add(CreateTableColumn("Saldo","AccountBalance"));
+        tableColumns.add(CreateTableColumn("Rekening","BankAccountId"));
+
+        USERACOUNTSCOLUMS = FXCollections.observableArrayList(tableColumns);
+    }
+
+    private TableColumn CreateTableColumn(String displayName,String valueName)
+    {
+        TableColumn column = new TableColumn(displayName);
+        column.setCellValueFactory(new PropertyValueFactory(valueName));
+        return column;
     }
 }
